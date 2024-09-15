@@ -17,9 +17,11 @@ package exporter
 
 import (
 	"encoding/xml"
+	"errors"
+	"fmt"
 )
 
-// SolarData XML representation.
+// SolarData represents the XML data retrieved from the RSS feed
 type SolarData struct {
 	XMLName        xml.Name `xml:"solardata"`
 	Updated        string   `xml:"updated"`
@@ -38,15 +40,92 @@ type SolarData struct {
 	SolarWind      float32  `xml:"solarwind"`
 	MagneticField  float32  `xml:"magneticfield"`
 
-	CalculatedConditions []struct {
-		Value string `xml:",cdata"`
-		Band  string `xml:"name,attr"`
-		Time  string `xml:"time,attr"`
-	} `xml:"calculatedconditions>band"`
+	CalculatedConditions    []HFCondition  `xml:"calculatedconditions>band"`
+	CalculatedVHFConditions []VHFCondition `xml:"calculatedvhfconditions>phenomenon"`
+}
 
-	CalculatedVHFConditions []struct {
-		Value      string `xml:",cdata"`
-		Phenomenon string `xml:"name,attr"`
-		Location   string `xml:"location,attr"`
-	} `xml:"calculatedvhfconditions>phenomenon"`
+// HFCondition represents an element of `<calculatedhfconditions>` list in the XML data
+type HFCondition struct {
+	Value HFStatus `xml:",cdata"`
+	Band  string   `xml:"name,attr"`
+	Time  string   `xml:"time,attr"`
+}
+
+// HFStatus
+type HFStatus int
+
+const (
+	//HF status
+	Poor HFStatus = iota
+	Fair
+	Good
+)
+
+// VHFCondition represents an element of `<calculatedvhfconditions>` list in the XML data
+type VHFCondition struct {
+	Value      VHFStatus `xml:",cdata"`
+	Phenomenon string    `xml:"name,attr"`
+	Location   string    `xml:"location,attr"`
+}
+
+// VHFStatus enum
+type VHFStatus int
+
+const (
+	//VHF status
+	BandClosed VHFStatus = iota
+	HighMUF
+	Es50MHz
+	Es70MHz
+	Es144MHz
+	MidLatAur
+	HighLatAur
+)
+
+var (
+	// Distinct VHF Conditions reported by the feed.
+	// The full list of values is collected from https://www.hamqsl.com/shortcut.html
+	vhf_status = map[string]VHFStatus{
+		"Band Closed":  BandClosed,
+		"High MUF":     HighMUF,
+		"50MHz ES":     Es50MHz,
+		"70MHz ES":     Es70MHz,
+		"144MHz ES":    Es144MHz,
+		"MID LAT AUR":  MidLatAur,
+		"High LAT AUR": HighLatAur,
+	}
+
+	// Distinct HF Conditions reported by the feed.
+	// Reported values are the following (using trial and error.)
+	hf_status = map[string]HFStatus{
+		"Poor": Poor,
+		"Fair": Fair,
+		"Good": Good,
+	}
+)
+
+// UnmarshalText function to map XML <phenomenon> values to enumerated VHF conditions using vhf_status map.
+func (s *VHFStatus) UnmarshalText(text []byte) error {
+	str := string(text)
+
+	status, ok := vhf_status[str]
+	if !ok {
+		return errors.New(fmt.Sprintf("Unknown VHF Status \"%s\"", str))
+	}
+
+	*s = status
+	return nil
+}
+
+// UnmarshalText function to map XML <band> values to enumerated HF conditions using hf_status map.
+func (s *HFStatus) UnmarshalText(text []byte) error {
+	str := string(text)
+
+	status, ok := hf_status[str]
+	if !ok {
+		return errors.New(fmt.Sprintf("Unknown HF Status \"%s\"", str))
+	}
+
+	*s = status
+	return nil
 }
