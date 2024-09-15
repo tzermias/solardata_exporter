@@ -85,13 +85,13 @@ var (
 
 	hf_condition = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "hf_condition"),
-		"Calculated HF conditions.",
-		[]string{"band_name", "time", "value"}, nil,
+		"Calculated HF conditions (0 = Poor, 1 = Fair, 2 = Good).",
+		[]string{"band_name", "time"}, nil,
 	)
 	vhf_condition = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "vhf_condition"),
-		"Calculated VHF conditions.",
-		[]string{"phenomenon", "location", "value"}, nil,
+		"Calculated VHF conditions (0 = Band Closed, 1 = High MUF, 2 = 50MHz ES, 3 = 70MHz ES, 4 = 144MHz ES, 5 = MID LAT AUR, 6 = High LAT AUR).",
+		[]string{"phenomenon", "location"}, nil,
 	)
 )
 
@@ -101,6 +101,7 @@ type Exporter struct {
 func NewExporter() *Exporter {
 	return &Exporter{}
 }
+
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- up
 	ch <- solarflux
@@ -177,14 +178,14 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	for _, condition := range data.CalculatedConditions {
 		// Create metric with values
 		ch <- prometheus.MustNewConstMetric(
-			hf_condition, prometheus.GaugeValue, 1, condition.Band, condition.Time, condition.Value,
+			hf_condition, prometheus.GaugeValue, float64(condition.Value), condition.Band, condition.Time,
 		)
 	}
 
 	// Calculated VHF conditions
 	for _, condition := range data.CalculatedVHFConditions {
 		ch <- prometheus.MustNewConstMetric(
-			vhf_condition, prometheus.GaugeValue, 1, condition.Phenomenon, condition.Location, condition.Value,
+			vhf_condition, prometheus.GaugeValue, float64(condition.Value), condition.Phenomenon, condition.Location,
 		)
 	}
 }
