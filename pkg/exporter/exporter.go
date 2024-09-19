@@ -57,6 +57,11 @@ var (
 		"Planetary K Index.",
 		nil, nil,
 	)
+	xrays = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "xrays"),
+		"Solar X-Rays.",
+		nil, nil,
+	)
 	protonflux = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "protonflux"),
 		"Proton Flux.",
@@ -82,7 +87,11 @@ var (
 		"Solar Wind.",
 		nil, nil,
 	)
-
+	magneticfield = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "magneticfield"),
+		"Magnetic Field (Bz component)",
+		nil, nil,
+	)
 	hf_condition = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "hf_condition"),
 		"Calculated HF conditions (0 = Poor, 1 = Fair, 2 = Good).",
@@ -108,6 +117,7 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- sunspots
 	ch <- aindex
 	ch <- kindex
+	ch <- xrays
 	ch <- protonflux
 	ch <- electronflux
 	ch <- aurora
@@ -159,6 +169,9 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		kindex, prometheus.GaugeValue, float64(data.KIndex),
 	)
 	ch <- prometheus.MustNewConstMetric(
+		xrays, prometheus.GaugeValue, float64(data.XRay),
+	)
+	ch <- prometheus.MustNewConstMetric(
 		protonflux, prometheus.GaugeValue, float64(data.ProtonFlux),
 	)
 	ch <- prometheus.MustNewConstMetric(
@@ -172,6 +185,9 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	)
 	ch <- prometheus.MustNewConstMetric(
 		solarwind, prometheus.GaugeValue, float64(data.SolarWind),
+	)
+	ch <- prometheus.MustNewConstMetric(
+		magneticfield, prometheus.GaugeValue, float64(data.MagneticField),
 	)
 
 	// Calculated HF conditions
