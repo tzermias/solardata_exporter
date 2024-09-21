@@ -45,5 +45,5 @@ jobs:
         platforms: linux/${{ matrix.arch }}
         push: true
         tags: tzermias/solardata_exporter:latest
-        build-args:
-          - BIN_DIR: ""
+        build-args: |
+          BIN_DIR=""
