@@ -28,7 +28,7 @@ jobs:
     - name: Build
       run: |
         mkdir -p bin
-        go build -v -o bin/solardata_exporter .
+        go build -v -o solardata_exporter .
 
     - name: Test
       run: go test -v .
