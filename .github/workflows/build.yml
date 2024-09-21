@@ -28,7 +28,7 @@ jobs:
     - name: Build
       run: |
         mkdir -p bin
-        go build -v -o solardata_exporter .
+        go build -v -o bin/solardata_exporter .
 
     - name: Test
       run: go test -v .
@@ -42,6 +42,7 @@ jobs:
     - name: Build and push image
       uses: docker/build-push-action@v3
       with:
+        context: .
         platforms: linux/${{ matrix.arch }}
         push: true
         tags: tzermias/solardata_exporter:latest
