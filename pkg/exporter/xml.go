@@ -19,6 +19,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 // SolarData represents the XML data retrieved from the RSS feed
@@ -29,7 +30,7 @@ type SolarData struct {
 	AIndex         int      `xml:"aindex"`
 	KIndex         int      `xml:"kindex"`
 	KIndexNT       string   `xml:"kindexnt"`
-	XRay           string   `xml:"xray"`
+	XRay           XRay     `xml:"xray"`
 	Sunspots       uint     `xml:"sunspots"`
 	HeliumLine     float32  `xml:"heliumline"`
 	ProtonFlux     uint     `xml:"protonflux"`
@@ -43,6 +44,12 @@ type SolarData struct {
 	CalculatedConditions    []HFCondition  `xml:"calculatedconditions>band"`
 	CalculatedVHFConditions []VHFCondition `xml:"calculatedvhfconditions>phenomenon"`
 }
+
+// XRayClass represent the different X-Ray classses (A, B, C, M or X)
+type XRayClass int
+
+// XRay
+type XRay float64
 
 // HFCondition represents an element of `<calculatedhfconditions>` list in the XML data
 type HFCondition struct {
@@ -59,6 +66,12 @@ const (
 	Poor HFStatus = iota
 	Fair
 	Good
+	// X-Ray Classes
+	A XRayClass = 1
+	B XRayClass = 10
+	C XRayClass = 100
+	M XRayClass = 1000
+	X XRayClass = 10000
 )
 
 // VHFCondition represents an element of `<calculatedvhfconditions>` list in the XML data
@@ -102,6 +115,15 @@ var (
 		"Fair": Fair,
 		"Good": Good,
 	}
+
+	// X-Ray Classes
+	xray_class = map[string]XRayClass{
+		"A": A,
+		"B": B,
+		"C": C,
+		"M": M,
+		"X": X,
+	}
 )
 
 // UnmarshalText function to map XML <phenomenon> values to enumerated VHF conditions using vhf_status map.
@@ -127,5 +149,18 @@ func (s *HFStatus) UnmarshalText(text []byte) error {
 	}
 
 	*s = status
+	return nil
+}
+
+// UnmarshalText function to convert X-Ray classes (e.g C1.1, M6.3, X9.9) to the actual scale
+func (x *XRay) UnmarshalText(text []byte) error {
+	// Ensure that first character is one of A, B, C, M or X
+	m := string(text[0])
+	n, err := strconv.ParseFloat(string(text[1:]), 64)
+	if !(m == "A" || m == "B" || m == "C" || m == "M" || m == "X") || err != nil {
+		return errors.New(fmt.Sprintf("Unknown Xray value \"%s\"", text))
+	}
+
+	*x = XRay(n * float64(xray_class[m]))
 	return nil
 }

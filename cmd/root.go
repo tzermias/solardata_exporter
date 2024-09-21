@@ -44,7 +44,7 @@ it into OpenMetrics format, ready to be scraped by Prometheus`,
 		prometheus.MustRegister(exporter)
 
 		http.Handle("/metrics", promhttp.Handler())
-		log.Println("Starting exporter ...")
+		log.Println(fmt.Sprintf("Starting solardata exporter in port %d ...", port))
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 	},
 }
