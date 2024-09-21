@@ -46,4 +46,4 @@ jobs:
         push: true
         tags: tzermias/solardata_exporter:latest
         build-args:
-          - BIN_DIR=""
+          - BIN_DIR: ""
