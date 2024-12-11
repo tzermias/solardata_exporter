@@ -23,12 +23,12 @@ If you use Docker compose, put the following in your `docker-compose.yaml` file
 version: 3
 
 services:
-	solardata_exporter:
-		image: tzermias/solardata_exporter:latest
-		container_name: solardata_exporter
-		restart: unless-stopped
-		ports:
-		- "9101:9101"
+  solardata_exporter:
+    image: tzermias/solardata_exporter:latest
+    container_name: solardata_exporter
+    restart: unless-stopped
+    ports:
+    - "9101:9101"
 ```
 
 ## Configuration
@@ -72,9 +72,9 @@ Metrics exported can be found on the following table. For additional data please
 Mapping for this metric is the following:
 | Value | Mapped Condition |
 | ----- | ---------------- |
-| 0 | *Poor* |
-| 1 | *Fair* |
-| 2 | *Good* |
+| 0 | **Poor** |
+| 1 | **Fair** |
+| 2 | **Good** |
 
 More information can be found at [this page](https://www.hamqsl.com/solar2.html#usingdata).
 
@@ -82,12 +82,12 @@ More information can be found at [this page](https://www.hamqsl.com/solar2.html#
 Mapping for this metric is the following:
 | Value | Mapped Condition |
 | ----- | ---------------- |
-| 0 | *Band Closed* (applicable to all locations) |
-| 1 | *High MUF* (applicable only when `location` is `europe` or `north_america`) |
-| 2 | *50MHz ES* E-sporadic on 6-meters band (only when `location` is `europe_6m`) |
-| 3 | *70MHz ES* E-sporadic on 4-meters band (only when `location` is `europe_4m`) |
-| 4 | *144MHz ES* E-sporadic on 2-meters band (only when `location` is `europe`)|
-| 5 | *MID LAT AUR* Auroral activity between 60° and 30°N. (applicable when `phenomenon` is `vhf-aurora` only) |
-| 6 | *High LAT AUR* Auroral activity greater than 60°N.  (applicable when `phenomenon` is `vhf-aurora` only) |
+| 0 | **Band Closed** (applicable to all locations) |
+| 1 | **High MUF** (applicable only when `location` is `europe` or `north_america`) |
+| 2 | **50MHz ES** E-sporadic on 6-meters band (only when `location` is `europe_6m`) |
+| 3 | **70MHz ES** E-sporadic on 4-meters band (only when `location` is `europe_4m`) |
+| 4 | **144MHz ES** E-sporadic on 2-meters band (only when `location` is `europe`) |
+| 5 | **MID LAT AUR** Auroral activity between 60° and 30°N. (applicable when `phenomenon` is `vhf-aurora` only) |
+| 6 | **High LAT AUR** Auroral activity greater than 60°N.  (applicable when `phenomenon` is `vhf-aurora` only) |
 
 More information can be found at [this page](https://www.hamqsl.com/solar2.html#usingdata).
