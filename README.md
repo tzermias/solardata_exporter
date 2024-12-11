@@ -1,14 +1,39 @@
 # solardata_exporter
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/tzermias/solardata_exporter)](https://goreportcard.com/report/github.com/tzermias/solardata_exporter)
+
 Scrape solar and terrestrial data feed from [N0NBH](https://hamqsl.com/) and expose them as Prometheus metrics.
 
-## Usage
+## Installation and Usage
 
-TBD
+### Docker
+
+The easiest way to spin up the exporter is by running it as a Docker container
+
+```bash
+docker run -d \
+  -p 9101:9101 \
+  --name solardata_exporter \
+  tzermias/solardata_exporter:latest
+```
+
+If you use Docker compose, put the following in your `docker-compose.yaml` file
+```yaml
+---
+version: 3
+
+services:
+	solardata_exporter:
+		image: tzermias/solardata_exporter:latest
+		container_name: solardata_exporter
+		restart: unless-stopped
+		ports:
+		- "9101:9101"
+```
 
 ## Configuration
 
-TBD
+The exporter listens to port `9101` by default. To override the port where the exporter listens to, run the exporter with `-p <PORT>` flag, where `<PORT>` indicates your new port.
 
 ## Prometheus Configuration
 
@@ -23,7 +48,7 @@ scrape_configs:
 
 ## Metrics
 
-Metrics exported can be found on the following table. For additiona data please refer to 
+Metrics exported can be found on the following table. For additional data please refer to 
 [this page](https://www.hamqsl.com/solar2.html#usingdata) on N0NBH site.
 
 | Name                  | Description                                                                                                  |
@@ -40,8 +65,29 @@ Metrics exported can be found on the following table. For additiona data please 
 | solar_aurora_latitude | Aurora Latitude                                                                                              |
 | solar_solarwind       | Solar Wind                                                                                                   |
 | solar_magneticfield   | Magnetic Field                                                                                               |
-| solar_hf_condition    | Calculated HF conditions per band and time of day                                                            |
-| solar_vhf_condition   | Calculated VHF conditions per phenomenon and location                                                        | 
+| solar_hf_condition    | Calculated HF conditions per band and time of day. Check below for value mappings.                                                             |
+| solar_vhf_condition   | Calculated VHF conditions per phenomenon and location. Check below for value mappings.                                                        | 
 
+### solar_hf_condition
+Mapping for this metric is the following:
+| Value | Mapped Condition |
+| ----- | ---------------- |
+| 0 | *Poor* |
+| 1 | *Fair* |
+| 2 | *Good* |
 
+More information can be found at [this page](https://www.hamqsl.com/solar2.html#usingdata).
 
+### solar_hf_condition
+Mapping for this metric is the following:
+| Value | Mapped Condition |
+| ----- | ---------------- |
+| 0 | *Band Closed* (applicable to all locations) |
+| 1 | *High MUF* (applicable only when `location` is `europe` or `north_america`) |
+| 2 | *50MHz ES* E-sporadic on 6-meters band (only when `location` is `europe_6m`) |
+| 3 | *70MHz ES* E-sporadic on 4-meters band (only when `location` is `europe_4m`) |
+| 4 | *144MHz ES* E-sporadic on 2-meters band (only when `location` is `europe`)|
+| 5 | *MID LAT AUR* Auroral activity between 60° and 30°N. (applicable when `phenomenon` is `vhf-aurora` only) |
+| 6 | *High LAT AUR* Auroral activity greater than 60°N.  (applicable when `phenomenon` is `vhf-aurora` only) |
+
+More information can be found at [this page](https://www.hamqsl.com/solar2.html#usingdata).
