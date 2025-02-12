@@ -28,9 +28,27 @@ archives:
 
 dockers:
   - image_templates:
-    - "tzermias/solardata_exporter:latest"
-    - "tzermias/solardata_exporter:{{ .Tag }}"
+    - "tzermias/solardata_exporter:{{ .Tag }}-amd64"
     dockerfile: Dockerfile
+    use: buildx
     build_flag_templates:
       - "--pull"
+      - "--platform=linux/amd64"
       - "--build-arg=BIN_DIR=/"
+  - image_templates:
+    - "tzermias/solardata_exporter:{{ .Tag }}-arm64"
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+      - "--build-arg=BIN_DIR=/"
+docker_manifests:
+  - name_template: "tzermias/solardata_exporter:{{ .Tag }}"
+    image_templates:
+    - "tzermias/solardata_exporter:{{ .Tag }}-amd64"
+    - "tzermias/solardata_exporter:{{ .Tag }}-arm64"
+  - name_template: "tzermias/solardata_exporter:latest"
+    image_templates:
+    - "tzermias/solardata_exporter:{{ .Tag }}-amd64"
+    - "tzermias/solardata_exporter:{{ .Tag }}-arm64"
