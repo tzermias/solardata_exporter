@@ -31,6 +31,7 @@ dockers:
     - "tzermias/solardata_exporter:{{ .Tag }}-amd64"
     dockerfile: Dockerfile
     use: buildx
+    goarch: amd64
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
@@ -39,6 +40,7 @@ dockers:
     - "tzermias/solardata_exporter:{{ .Tag }}-arm64"
     dockerfile: Dockerfile
     use: buildx
+    goarch: arm64
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
