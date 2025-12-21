@@ -17,6 +17,7 @@ package exporter
 
 import (
 	"encoding/xml"
+	"fmt"
 	"log"
 
 	"github.com/mmcdole/gofeed"
@@ -31,10 +32,14 @@ const (
 	namespace = "solar"
 
 	// User-Agent to use when performing requests
-	user_agent = "solardata_exporter/0.1 (https://github.com/tzermias/solardata_exporter)"
+	user_agent = "solardata_exporter/%s (https://github.com/tzermias/solardata_exporter)"
 )
 
 var (
+	Version   = "dev"
+	Commit    = "unknown"
+	BuildTime = "unknown"
+
 	up = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "up"),
 		"Was the last scrape of the feed successful.",
@@ -135,7 +140,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 	// Fetch data from the URL and parse them
 	fp := gofeed.NewParser()
-	fp.UserAgent = user_agent
+	fp.UserAgent = fmt.Sprintf(user_agent, Version)
 	feed, err := fp.ParseURL(feed_url)
 	if err != nil {
 		log.Println("Could not fetch RSS data")

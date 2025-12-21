@@ -16,6 +16,11 @@ builds:
     goarch:
       - amd64
       - arm64
+    ldflags:
+      - -X "github.com/tzermias/solardata_exporter/pkg.Version={{.Version}}"
+      - -X "github.com/tzermias/solardata_exporter/pkg.Commit={{.ShortCommit}}"
+      - -X "github.com/tzermias/solardata_exporter/pkg.BuildTime={{.Date}}"
+
 archives:
   - format: tar.gz
     name_template: >-
