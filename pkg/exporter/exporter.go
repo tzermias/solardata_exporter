@@ -16,23 +16,16 @@ limitations under the License.
 package exporter
 
 import (
-	"encoding/xml"
-	"fmt"
 	"log"
 
-	"github.com/mmcdole/gofeed"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
 	// RSS Feed URL
 	feed_url = "https://www.hamqsl.com/solarrss.php"
-
 	// Prometheus namespace
 	namespace = "solar"
-
-	// User-Agent to use when performing requests
-	user_agent = "solardata_exporter/%s (https://github.com/tzermias/solardata_exporter)"
 )
 
 var (
@@ -136,25 +129,10 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	var data SolarData
+	data, err := fetchData(feed_url)
 
-	// Fetch data from the URL and parse them
-	fp := gofeed.NewParser()
-	fp.UserAgent = fmt.Sprintf(user_agent, Version)
-	feed, err := fp.ParseURL(feed_url)
 	if err != nil {
-		log.Println("Could not fetch RSS data")
-		log.Println(err)
-		ch <- prometheus.MustNewConstMetric(
-			up, prometheus.GaugeValue, 0,
-		)
-		return
-	}
-	// Parse XML
-	err = xml.Unmarshal([]byte(feed.Items[0].Custom["solar"]), &data)
-	if err != nil {
-		log.Println("Could not parse XML data from RSS feed")
-		log.Println(err)
+		log.Printf("Error collecting data: %v", err)
 		ch <- prometheus.MustNewConstMetric(
 			up, prometheus.GaugeValue, 0,
 		)
