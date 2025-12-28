@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/xml"
 	"testing"
+	"time"
 
 	"github.com/mmcdole/gofeed"
 )
@@ -35,6 +36,7 @@ func TestXMLParsing(t *testing.T) {
 		input    interface{}
 		expected interface{}
 	}{
+		{"Updated", data.Updated.UTC(), time.Date(2025, 03, 01, 23, 56, 00, 0, time.UTC)},
 		{"SolarFlux", data.SolarFlux, 145},
 		{"AIndex", data.AIndex, 19},
 		{"KIndex", data.KIndex, 3},
