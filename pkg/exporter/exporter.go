@@ -17,6 +17,8 @@ package exporter
 
 import (
 	"log"
+	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -108,8 +110,43 @@ var (
 type Exporter struct {
 }
 
+type CollectedData struct {
+	mu   sync.Mutex
+	data SolarData
+	err  error
+}
+
+var collected_data CollectedData
+
 func NewExporter() *Exporter {
+	// Perform HTTP request to fetch data on a goroutine.
+	// Invoke fetchData() every 60 seconds
+	ticker := time.NewTicker(60 * time.Second)
+	done := make(chan bool)
+
+	// Collect data initially
+	asyncCollectData()
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				asyncCollectData()
+			}
+		}
+	}()
+
 	return &Exporter{}
+}
+
+// Collects data asynchrounsly.
+func asyncCollectData() {
+	collected_data.mu.Lock()
+	defer collected_data.mu.Unlock()
+
+	collected_data.data, collected_data.err = fetchData(feed_url)
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
@@ -129,7 +166,10 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	data, err := fetchData(feed_url)
+	collected_data.mu.Lock()
+	data := collected_data.data
+	err := collected_data.err
+	collected_data.mu.Unlock()
 
 	if err != nil {
 		log.Printf("Error collecting data: %v", err)
