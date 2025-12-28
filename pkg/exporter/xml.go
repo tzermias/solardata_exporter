@@ -20,29 +20,35 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 // SolarData represents the XML data retrieved from the RSS feed
 type SolarData struct {
-	XMLName        xml.Name `xml:"solardata"`
-	Updated        string   `xml:"updated"`
-	SolarFlux      int      `xml:"solarflux"`
-	AIndex         int      `xml:"aindex"`
-	KIndex         int      `xml:"kindex"`
-	KIndexNT       string   `xml:"kindexnt"`
-	XRay           XRay     `xml:"xray"`
-	Sunspots       uint     `xml:"sunspots"`
-	HeliumLine     float32  `xml:"heliumline"`
-	ProtonFlux     uint     `xml:"protonflux"`
-	ElectronFlux   uint     `xml:"electonflux"`
-	Aurora         int      `xml:"aurora"`
-	AuroraLatitude float32  `xml:"latdegree"`
-	Normalization  float32  `xml:"normalization"`
-	SolarWind      float32  `xml:"solarwind"`
-	MagneticField  float32  `xml:"magneticfield"`
+	XMLName        xml.Name        `xml:"solardata"`
+	Updated        customTimestamp `xml:"updated"`
+	SolarFlux      int             `xml:"solarflux"`
+	AIndex         int             `xml:"aindex"`
+	KIndex         int             `xml:"kindex"`
+	KIndexNT       string          `xml:"kindexnt"`
+	XRay           XRay            `xml:"xray"`
+	Sunspots       uint            `xml:"sunspots"`
+	HeliumLine     float32         `xml:"heliumline"`
+	ProtonFlux     uint            `xml:"protonflux"`
+	ElectronFlux   uint            `xml:"electonflux"`
+	Aurora         int             `xml:"aurora"`
+	AuroraLatitude float32         `xml:"latdegree"`
+	Normalization  float32         `xml:"normalization"`
+	SolarWind      float32         `xml:"solarwind"`
+	MagneticField  float32         `xml:"magneticfield"`
 
 	CalculatedConditions    []HFCondition  `xml:"calculatedconditions>band"`
 	CalculatedVHFConditions []VHFCondition `xml:"calculatedvhfconditions>phenomenon"`
+}
+
+// customTimestamp type to parse the timestamp from the XML file.
+type customTimestamp struct {
+	time.Time
 }
 
 // XRayClass represent the different X-Ray classses (A, B, C, M or X)
@@ -162,5 +168,17 @@ func (x *XRay) UnmarshalText(text []byte) error {
 	}
 
 	*x = XRay(n * float64(xray_class[m]))
+	return nil
+}
+
+// UnmarshalText function to convert the custom time format.
+func (t *customTimestamp) UnmarshalText(text []byte) error {
+	const customFormat = " 02 Jan 2006 1504 GMT"
+	str := string(text)
+	parsed, err := time.Parse(customFormat, str)
+	if err != nil {
+		return err
+	}
+	*t = customTimestamp{parsed}
 	return nil
 }
