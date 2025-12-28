@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	// RSS Feed URL
-	feed_url = "https://www.hamqsl.com/solarrss.php"
+	// XML Feed URL
+	feed_url = "https://www.hamqsl.com/solarxml.php"
 	// Prometheus namespace
 	namespace = "solar"
 )
