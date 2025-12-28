@@ -23,9 +23,12 @@ import (
 	"time"
 )
 
-// SolarData represents the XML data retrieved from the RSS feed
+// Solar and SolarData represents the XML data retrieved from the RSS feed
+type Solar struct {
+	XMLName xml.Name  `xml:"solar"`
+	Data    SolarData `xml:"solardata"`
+}
 type SolarData struct {
-	XMLName        xml.Name        `xml:"solardata"`
 	Updated        customTimestamp `xml:"updated"`
 	SolarFlux      int             `xml:"solarflux"`
 	AIndex         int             `xml:"aindex"`

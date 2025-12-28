@@ -5,27 +5,21 @@ import (
 	"encoding/xml"
 	"testing"
 	"time"
-
-	"github.com/mmcdole/gofeed"
 )
 
 //go:embed testdata/success.xml
 var success_data string
 
 func TestXMLParsing(t *testing.T) {
+	var solar Solar
 	var data SolarData
 
-	fp := gofeed.NewParser()
-	feed, err := fp.ParseString(success_data)
-	if err != nil {
-		t.Fatalf("Couldn't parse RSS feed. Error: %v", err)
-	}
-
-	err = xml.Unmarshal([]byte(feed.Items[0].Custom["solar"]), &data)
+	err := xml.Unmarshal([]byte(success_data), &solar)
 	if err != nil {
 		t.Fatalf("Couldn't parse XML data. Error: %v", err)
 	}
 
+	data = solar.Data
 	//Solarflux
 	if data.SolarFlux != 145 {
 		t.Errorf("Expected SolarFlux value 145, got %d", data.SolarFlux)
