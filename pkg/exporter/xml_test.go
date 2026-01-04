@@ -36,7 +36,7 @@ func TestXMLParsing(t *testing.T) {
 		{"KIndex", data.KIndex, 3},
 		{"KIndexNT", data.KIndexNT, "No Report"},
 		{"XRay", data.XRay, XRay(720)},
-		{"Sunspots", data.Sunspots, uint(105)},
+		{"Sunspots", data.Sunspots, Sunspots(105)},
 		{"HeliumLine", data.HeliumLine, float32(142.3)},
 		{"ProtonFlux", data.ProtonFlux, uint(80)},
 		{"ElectronFlux", data.ElectronFlux, uint(2100)},
@@ -53,5 +53,31 @@ func TestXMLParsing(t *testing.T) {
 				t.Errorf("%s: Expected value %v, got %v", test.name, test.input, test.expected)
 			}
 		})
+	}
+}
+
+func TestParseNoRpt(t *testing.T) {
+	// A rudimentary test to check "NoRpt" parsing. Should always return 0
+	test_data := `
+	<solar>
+		<solardata>
+			<source url="http://www.hamqsl.com/solar.html">N0NBH</source>
+			<updated> 04 Jan 2026 2202 GMT</updated>
+			<sunspots>NoRpt</sunspots>
+		</solardata>
+	</solar>
+`
+	var solar Solar
+	var data SolarData
+
+	err := xml.Unmarshal([]byte(test_data), &solar)
+	if err != nil {
+		t.Fatalf("Couldn't parse XML data. Error: %v", err)
+	}
+
+	data = solar.Data
+	//Solarflux
+	if data.Sunspots != 0 {
+		t.Errorf("Sunspots: Expected value: 0, got %v", data.Sunspots)
 	}
 }
