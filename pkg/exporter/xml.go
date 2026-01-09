@@ -35,10 +35,10 @@ type SolarData struct {
 	KIndex         int             `xml:"kindex"`
 	KIndexNT       string          `xml:"kindexnt"`
 	XRay           XRay            `xml:"xray"`
-	Sunspots       Sunspots        `xml:"sunspots"`
+	Sunspots       uint            `xml:"sunspots"`
 	HeliumLine     float32         `xml:"heliumline"`
-	ProtonFlux     uint            `xml:"protonflux"`
-	ElectronFlux   uint            `xml:"electonflux"`
+	ProtonFlux     ProtonFlux      `xml:"protonflux"`
+	ElectronFlux   ElectronFlux    `xml:"electonflux"`
 	Aurora         int             `xml:"aurora"`
 	AuroraLatitude float32         `xml:"latdegree"`
 	Normalization  float32         `xml:"normalization"`
@@ -54,7 +54,12 @@ type customTimestamp struct {
 	time.Time
 }
 
-type Sunspots uint
+// custom types for ProtonFlux/ElectronFlux to handle parsing on "NoRpt" value
+// emitted from the source.
+type (
+	ProtonFlux   uint
+	ElectronFlux uint
+)
 
 // XRayClass represent the different X-Ray classses (A, B, C, M or X)
 type XRayClass int
@@ -188,14 +193,26 @@ func (t *customTimestamp) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// UnmarshalText for Sunspots. In case of a parse error (usually a "NoRpt" string
+// UnmarshalText for ProtonFlux. In case of a parse error (usually a "NoRpt" string
 // in the field), return 0.
-func (s *Sunspots) UnmarshalText(text []byte) error {
-	sunspots, err := strconv.ParseUint(string(text), 10, 32)
+func (p *ProtonFlux) UnmarshalText(text []byte) error {
+	protonflux, err := strconv.ParseUint(string(text), 10, 32)
 	if err != nil {
-		sunspots = 0
+		protonflux = 0
 	}
-	*s = Sunspots(sunspots)
+	*p = ProtonFlux(protonflux)
+
+	return nil
+}
+
+// UnmarshalText for ElectronFlux. In case of a parse error (usually a "NoRpt" string
+// in the field), return 0.
+func (e *ElectronFlux) UnmarshalText(text []byte) error {
+	electronflux, err := strconv.ParseUint(string(text), 10, 32)
+	if err != nil {
+		electronflux = 0
+	}
+	*e = ElectronFlux(electronflux)
 
 	return nil
 }
