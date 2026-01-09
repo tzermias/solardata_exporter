@@ -36,10 +36,10 @@ func TestXMLParsing(t *testing.T) {
 		{"KIndex", data.KIndex, 3},
 		{"KIndexNT", data.KIndexNT, "No Report"},
 		{"XRay", data.XRay, XRay(720)},
-		{"Sunspots", data.Sunspots, Sunspots(105)},
+		{"Sunspots", data.Sunspots, uint(105)},
 		{"HeliumLine", data.HeliumLine, float32(142.3)},
-		{"ProtonFlux", data.ProtonFlux, uint(80)},
-		{"ElectronFlux", data.ElectronFlux, uint(2100)},
+		{"ProtonFlux", data.ProtonFlux, ProtonFlux(80)},
+		{"ElectronFlux", data.ElectronFlux, ElectronFlux(2100)},
 		{"Aurora", data.Aurora, 1},
 		{"AuroraLatitude", data.AuroraLatitude, float32(67.5)},
 		{"Normalization", data.Normalization, float32(1.99)},
@@ -59,13 +59,18 @@ func TestXMLParsing(t *testing.T) {
 func TestParseNoRpt(t *testing.T) {
 	// A rudimentary test to check "NoRpt" parsing. Should always return 0
 	test_data := `
+	<?xml version="1.0"?>
 	<solar>
-		<solardata>
-			<source url="http://www.hamqsl.com/solar.html">N0NBH</source>
-			<updated> 04 Jan 2026 2202 GMT</updated>
-			<sunspots>NoRpt</sunspots>
-		</solardata>
-	</solar>
+			<solardata>
+				<source url="http://www.hamqsl.com/solar.html">N0NBH</source>
+				<updated> 09 Jan 2026 0851 GMT</updated>
+				<solarflux>140</solarflux>
+				<sunspots>84</sunspots>
+				<heliumline>128.2</heliumline>
+				<protonflux>NoRpt</protonflux>
+				<electonflux>NoRpt</electonflux>
+			</solardata>
+		</solar>
 `
 	var solar Solar
 	var data SolarData
@@ -76,8 +81,24 @@ func TestParseNoRpt(t *testing.T) {
 	}
 
 	data = solar.Data
+
 	//Solarflux
-	if data.Sunspots != 0 {
-		t.Errorf("Sunspots: Expected value: 0, got %v", data.Sunspots)
+	if data.ProtonFlux != 0 {
+		t.Errorf("ProtonFlux: Expected value: 0, got %v", data.ProtonFlux)
+	}
+	tests := []struct {
+		name     string
+		input    interface{}
+		expected interface{}
+	}{
+		{"ProtonFlux", data.ProtonFlux, ProtonFlux(0)},
+		{"ElectronFlux", data.ElectronFlux, ElectronFlux(0)},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.input != test.expected {
+				t.Errorf("NoRpt in %s field: Expected value %v, got %v", test.name, test.input, test.expected)
+			}
+		})
 	}
 }
